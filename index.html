@@ -88,8 +88,34 @@ color:#666;
 /* TREE */
 
 #plant{
-margin-top:60px;
+position:absolute;
+bottom:40px;
+left:50%;
+transform:translateX(-50%);
 z-index:2;
+}
+
+/* TREE SWAY ANIMATION */
+
+#plant svg{
+animation:treesway 6s ease-in-out infinite;
+transform-origin:bottom center;
+}
+
+@keyframes treesway{
+
+0%{
+transform:rotate(-2deg);
+}
+
+50%{
+transform:rotate(2deg);
+}
+
+100%{
+transform:rotate(-2deg);
+}
+
 }
 
 /* COUNTER */
