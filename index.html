@@ -21,9 +21,9 @@ flex-direction:column;
 align-items:center;
 overflow:hidden;
 position:relative;
-padding-top:40px;
 }
 
+/* PARTICLES */
 #particles{
 position:absolute;
 top:0;
@@ -33,8 +33,9 @@ height:100%;
 z-index:0;
 }
 
+/* HEADER */
 header{
-margin-top:10px;
+margin-top:20px;
 z-index:2;
 }
 
@@ -43,40 +44,66 @@ font-family:'Playfair Display',serif;
 font-size:2.5rem;
 }
 
+/* MAIN */
 .main{
 text-align:center;
-margin-top:70px;
+margin-top:40px;
 z-index:2;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:20px;
 }
 
 #task{
 font-family:'Caveat',cursive;
-font-size:2.6rem;
+font-size:2.8rem;
 max-width:420px;
-margin-bottom:40px;
+text-align:center;
 }
 
+/* BUTTONS */
 button{
-padding:16px 36px;
+padding:14px 30px;
 border:none;
 border-radius:40px;
 font-family:'Caveat',cursive;
-font-size:1.6rem;
+font-size:1.4rem;
 background:white;
 cursor:pointer;
-margin:5px;
+transition:0.2s;
 }
 
+button:hover{
+transform:translateY(-2px);
+}
+
+/* MESSAGE */
 #message{
-margin-top:15px;
+margin-top:5px;
 font-size:1rem;
 color:#666;
 }
 
-/* 🌿 GARDEN */
+/* TREE */
+#plant{
+position:fixed;
+bottom:10px;
+left:50%;
+transform:translateX(-50%);
+z-index:1;
+pointer-events:none;
+}
+
+#plant svg{
+animation:treesway 6s ease-in-out infinite;
+transform-origin:bottom center;
+}
+
+/* GARDEN */
 #garden{
 position:fixed;
-bottom:0;
+bottom:20px;
 left:0;
 width:100%;
 display:flex;
@@ -86,26 +113,14 @@ z-index:1;
 flex-wrap:wrap;
 }
 
-/* TREE */
-#plant{
-position:fixed;
-bottom:0;
-left:50%;
-transform:translateX(-50%);
-z-index:1;
-}
-
-#plant svg{
-animation:treesway 6s ease-in-out infinite;
-transform-origin:bottom center;
-}
-
+/* ANIMATION */
 @keyframes treesway{
 0%{transform:rotate(-2deg);}
 50%{transform:rotate(2deg);}
 100%{transform:rotate(-2deg);}
 }
 
+/* COUNTER */
 #counter{
 position:absolute;
 top:20px;
@@ -113,6 +128,7 @@ right:25px;
 z-index:2;
 }
 
+/* FOOTER */
 #footer{
 position:fixed;
 bottom:8px;
@@ -136,16 +152,18 @@ z-index:2;
 </header>
 
 <div class="main">
+
 <div id="task"></div>
 
-<button onclick="setMode('tree')">🌳 Tree Mode</button>
-<button onclick="setMode('garden')">🌸 Garden Mode</button>
-
-<br><br>
+<div>
+<button onclick="setMode('tree')">🌳 Tree</button>
+<button onclick="setMode('garden')">🌸 Garden</button>
+</div>
 
 <button id="completeBtn" onclick="completeTask()">Task Completed!!</button>
 
 <div id="message"></div>
+
 </div>
 
 <div id="plant"></div>
@@ -184,14 +202,14 @@ mode:"tree",
 garden:[]
 };
 
-/* MODE */
+/* MODE SWITCH */
 function setMode(m){
 data.mode=m;
 localStorage.setItem("rooted",JSON.stringify(data));
-location.reload();
+renderAll();
 }
 
-/* WEEK RESET */
+/* WEEK CHECK */
 function checkWeek(){
 
 const start=new Date(data.weekStart);
@@ -207,8 +225,10 @@ data.trees++;
 addPlant();
 }
 
+setTimeout(()=>{
 document.getElementById("message").innerText=
 "couldn't afford the iphone apple but you deserve this one 🫶";
+},300);
 }
 
 data.weekStart=todayKey;
@@ -223,7 +243,7 @@ checkWeek();
 document.getElementById("task").innerText=
 tasks[(new Date().getDay()+data.trees*7)%tasks.length];
 
-/* COMPLETE */
+/* COMPLETE TASK */
 function completeTask(){
 
 if(data.completedDays.includes(todayKey)){
@@ -234,16 +254,16 @@ return;
 data.completedDays.push(todayKey);
 localStorage.setItem("rooted",JSON.stringify(data));
 
-renderPlant();
+document.getElementById("completeBtn").style.display="none";
+
+renderAll();
 
 document.getElementById("message").innerText="Proud of you 🌱";
-document.getElementById("completeBtn").style.display="none";
 }
 
-/* 🌳 TREE */
+/* TREE */
 function renderPlant(){
 
-const stage=data.completedDays.length;
 const plant=document.getElementById("plant");
 
 if(data.mode!=="tree"){
@@ -251,6 +271,7 @@ plant.innerHTML="";
 return;
 }
 
+const stage=data.completedDays.length;
 const canopy=40+stage*10;
 
 const apple=stage===7?`<circle cx="160" cy="95" r="7" fill="red"/>`:"";
@@ -267,13 +288,14 @@ ${apple}
 `;
 }
 
-/* 🌸 GARDEN */
+/* GARDEN */
 function addPlant(){
-const plants=["🌸","🌼","🌻","🌷","🌵","🌿"];
+const plants=["🌸","🌼","🌻","🌷","🌿"];
 data.garden.push(plants[Math.floor(Math.random()*plants.length)]);
 }
 
 function renderGarden(){
+
 const g=document.getElementById("garden");
 
 if(data.mode!=="garden"){
@@ -284,14 +306,19 @@ return;
 g.innerHTML=data.garden.map(p=>`<div style="font-size:30px">${p}</div>`).join("");
 }
 
+/* RENDER ALL */
+function renderAll(){
 renderPlant();
 renderGarden();
 
-/* FIX BUTTON */
 if(data.completedDays.includes(todayKey)){
 document.getElementById("completeBtn").style.display="none";
-document.getElementById("message").innerText="heyy, only one task a day 🌿";
+}else{
+document.getElementById("completeBtn").style.display="block";
 }
+}
+
+renderAll();
 
 /* COUNTER */
 document.getElementById("counter").innerText=
