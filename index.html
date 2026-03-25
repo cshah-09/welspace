@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rooted</title>
-<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
 
 <link rel="icon" type="image/png" sizes="100x100" href="favicon.png">
 
@@ -25,7 +24,6 @@ position:relative;
 padding-top:40px;
 }
 
-/* PARTICLES */
 #particles{
 position:absolute;
 top:0;
@@ -35,7 +33,6 @@ height:100%;
 z-index:0;
 }
 
-/* HEADER */
 header{
 margin-top:10px;
 z-index:2;
@@ -44,10 +41,8 @@ z-index:2;
 h1{
 font-family:'Playfair Display',serif;
 font-size:2.5rem;
-margin:0;
 }
 
-/* MAIN */
 .main{
 text-align:center;
 margin-top:70px;
@@ -69,12 +64,26 @@ font-family:'Caveat',cursive;
 font-size:1.6rem;
 background:white;
 cursor:pointer;
+margin:5px;
 }
 
 #message{
 margin-top:15px;
 font-size:1rem;
 color:#666;
+}
+
+/* 🌿 GARDEN */
+#garden{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+display:flex;
+justify-content:center;
+gap:10px;
+z-index:1;
+flex-wrap:wrap;
 }
 
 /* TREE */
@@ -97,7 +106,6 @@ transform-origin:bottom center;
 100%{transform:rotate(-2deg);}
 }
 
-/* COUNTER */
 #counter{
 position:absolute;
 top:20px;
@@ -105,7 +113,6 @@ right:25px;
 z-index:2;
 }
 
-/* FOOTER */
 #footer{
 position:fixed;
 bottom:8px;
@@ -130,11 +137,19 @@ z-index:2;
 
 <div class="main">
 <div id="task"></div>
+
+<button onclick="setMode('tree')">🌳 Tree Mode</button>
+<button onclick="setMode('garden')">🌸 Garden Mode</button>
+
+<br><br>
+
 <button id="completeBtn" onclick="completeTask()">Task Completed!!</button>
+
 <div id="message"></div>
 </div>
 
 <div id="plant"></div>
+<div id="garden"></div>
 
 <div id="footer">Rooted © 2026</div>
 
@@ -164,10 +179,47 @@ const todayKey=pst.toDateString();
 let data=JSON.parse(localStorage.getItem("rooted"))||{
 weekStart:todayKey,
 completedDays:[],
-trees:0
+trees:0,
+mode:"tree",
+garden:[]
 };
 
-/* TASK DISPLAY */
+/* MODE */
+function setMode(m){
+data.mode=m;
+localStorage.setItem("rooted",JSON.stringify(data));
+location.reload();
+}
+
+/* WEEK RESET */
+function checkWeek(){
+
+const start=new Date(data.weekStart);
+const diff=Math.floor((pst-start)/(1000*60*60*24));
+
+if(diff>=7){
+
+if(data.completedDays.length===7){
+
+if(data.mode==="tree"){
+data.trees++;
+}else{
+addPlant();
+}
+
+document.getElementById("message").innerText=
+"couldn't afford the iphone apple but you deserve this one 🫶";
+}
+
+data.weekStart=todayKey;
+data.completedDays=[];
+localStorage.setItem("rooted",JSON.stringify(data));
+}
+}
+
+checkWeek();
+
+/* TASK */
 document.getElementById("task").innerText=
 tasks[(new Date().getDay()+data.trees*7)%tasks.length];
 
@@ -188,11 +240,17 @@ document.getElementById("message").innerText="Proud of you 🌱";
 document.getElementById("completeBtn").style.display="none";
 }
 
-/* TREE */
+/* 🌳 TREE */
 function renderPlant(){
 
 const stage=data.completedDays.length;
 const plant=document.getElementById("plant");
+
+if(data.mode!=="tree"){
+plant.innerHTML="";
+return;
+}
+
 const canopy=40+stage*10;
 
 const apple=stage===7?`<circle cx="160" cy="95" r="7" fill="red"/>`:"";
@@ -209,9 +267,27 @@ ${apple}
 `;
 }
 
-renderPlant();
+/* 🌸 GARDEN */
+function addPlant(){
+const plants=["🌸","🌼","🌻","🌷","🌵","🌿"];
+data.garden.push(plants[Math.floor(Math.random()*plants.length)]);
+}
 
-/* 🔥 THIS FIXES YOUR MAIN ISSUE */
+function renderGarden(){
+const g=document.getElementById("garden");
+
+if(data.mode!=="garden"){
+g.innerHTML="";
+return;
+}
+
+g.innerHTML=data.garden.map(p=>`<div style="font-size:30px">${p}</div>`).join("");
+}
+
+renderPlant();
+renderGarden();
+
+/* FIX BUTTON */
 if(data.completedDays.includes(todayKey)){
 document.getElementById("completeBtn").style.display="none";
 document.getElementById("message").innerText="heyy, only one task a day 🌿";
@@ -250,7 +326,8 @@ p.y+=p.dy;
 if(p.x<0||p.x>canvas.width)p.dx*=-1;
 if(p.y<0||p.y>canvas.height)p.dy*=-1;
 
-ctx.fillStyle="rgba(100,150,255,0.9)";
+ctx.fillStyle="rgba(120,180,255,0.9)";
+
 ctx.beginPath();
 ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
 ctx.fill();
