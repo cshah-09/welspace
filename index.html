@@ -62,7 +62,7 @@ max-width:420px;
 text-align:center;
 }
 
-/* BUTTONS */
+/* BUTTON */
 button{
 padding:14px 30px;
 border:none;
@@ -80,7 +80,6 @@ transform:translateY(-2px);
 
 /* MESSAGE */
 #message{
-margin-top:5px;
 font-size:1rem;
 color:#666;
 }
@@ -100,20 +99,6 @@ animation:treesway 6s ease-in-out infinite;
 transform-origin:bottom center;
 }
 
-/* GARDEN */
-#garden{
-position:fixed;
-bottom:20px;
-left:0;
-width:100%;
-display:flex;
-justify-content:center;
-gap:10px;
-z-index:1;
-flex-wrap:wrap;
-}
-
-/* ANIMATION */
 @keyframes treesway{
 0%{transform:rotate(-2deg);}
 50%{transform:rotate(2deg);}
@@ -155,11 +140,6 @@ z-index:2;
 
 <div id="task"></div>
 
-<div>
-<button onclick="setMode('tree')">🌳 Tree</button>
-<button onclick="setMode('garden')">🌸 Garden</button>
-</div>
-
 <button id="completeBtn" onclick="completeTask()">Task Completed!!</button>
 
 <div id="message"></div>
@@ -167,7 +147,6 @@ z-index:2;
 </div>
 
 <div id="plant"></div>
-<div id="garden"></div>
 
 <div id="footer">Rooted © 2026</div>
 
@@ -197,17 +176,8 @@ const todayKey=pst.toDateString();
 let data=JSON.parse(localStorage.getItem("rooted"))||{
 weekStart:todayKey,
 completedDays:[],
-trees:0,
-mode:"tree",
-garden:[]
+trees:0
 };
-
-/* MODE SWITCH */
-function setMode(m){
-data.mode=m;
-localStorage.setItem("rooted",JSON.stringify(data));
-renderAll();
-}
 
 /* WEEK CHECK */
 function checkWeek(){
@@ -218,15 +188,10 @@ const diff=Math.floor((pst-start)/(1000*60*60*24));
 if(diff>=7){
 
 if(data.completedDays.length===7){
-
-if(data.mode==="tree"){
 data.trees++;
-}else{
-addPlant();
-}
 
 setTimeout(()=>{
-document.getElementById("message").innerText=
+document.getElementById("message").innerText =
 "couldn't afford the iphone apple but you deserve this one 🫶";
 },300);
 }
@@ -256,7 +221,7 @@ localStorage.setItem("rooted",JSON.stringify(data));
 
 document.getElementById("completeBtn").style.display="none";
 
-renderAll();
+renderPlant();
 
 document.getElementById("message").innerText="Proud of you 🌱";
 }
@@ -264,19 +229,14 @@ document.getElementById("message").innerText="Proud of you 🌱";
 /* TREE */
 function renderPlant(){
 
-const plant=document.getElementById("plant");
-
-if(data.mode!=="tree"){
-plant.innerHTML="";
-return;
-}
-
 const stage=data.completedDays.length;
 const canopy=40+stage*10;
 
-const apple=stage===7?`<circle cx="160" cy="95" r="7" fill="red"/>`:"";
+const apple = (data.completedDays.length === 7) ? `
+<circle cx="160" cy="95" r="7" fill="red"/>
+` : "";
 
-plant.innerHTML=`
+document.getElementById("plant").innerHTML=`
 <svg width="260" height="260">
 <rect x="120" y="120" width="14" height="100" fill="#7a4f2f"/>
 <circle cx="127" cy="110" r="${canopy}" fill="#b8e6c1"/>
@@ -288,37 +248,13 @@ ${apple}
 `;
 }
 
-/* GARDEN */
-function addPlant(){
-const plants=["🌸","🌼","🌻","🌷","🌿"];
-data.garden.push(plants[Math.floor(Math.random()*plants.length)]);
-}
-
-function renderGarden(){
-
-const g=document.getElementById("garden");
-
-if(data.mode!=="garden"){
-g.innerHTML="";
-return;
-}
-
-g.innerHTML=data.garden.map(p=>`<div style="font-size:30px">${p}</div>`).join("");
-}
-
-/* RENDER ALL */
-function renderAll(){
 renderPlant();
-renderGarden();
 
+/* BUTTON FIX AFTER REFRESH */
 if(data.completedDays.includes(todayKey)){
 document.getElementById("completeBtn").style.display="none";
-}else{
-document.getElementById("completeBtn").style.display="block";
+document.getElementById("message").innerText="heyy, only one task a day 🌿";
 }
-}
-
-renderAll();
 
 /* COUNTER */
 document.getElementById("counter").innerText=
